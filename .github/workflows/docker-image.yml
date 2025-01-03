@@ -34,7 +34,7 @@ jobs:
 
     - name: Run container
       run: |
-        docker run -d -p 8080:80 --name random-number-container-app ghcr.io/${{ github.repository }}/random-number-container-app:latest
+        docker run -d -p 8080:80 --name random-number-container-app ghcr.io/${{ github.repository }}/random-number-container-app:oops
         sleep 10 # Wait for the container to be fully up and running
 
     - name: Test container
