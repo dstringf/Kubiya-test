@@ -26,9 +26,10 @@ jobs:
     - name: Build Docker Image
       uses: docker/build-push-action@v6.10.0
       with:
-        context: .
-        push: false
-        tags: random-number-container-app:latest
+      context: .
+      push: false
+      tags: random-number-container-app:latest
+      load: true
 
     - name: Run container
       run: |
