@@ -1,0 +1,54 @@
+name: Build, Test, and Push Docker Image
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4.2.2
+  
+    - name: Docker Setup Buildx
+      uses: docker/setup-buildx-action@v3.8.0
+  
+    - name: Docker Login
+      uses: docker/login-action@v3.3.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build Docker Image
+      uses: docker/build-push-action@v6.10.0
+      with:
+        context: .
+        push: false
+        tags: ghcr.io/${{ github.repository }}/random-number-container-app:latest
+
+    - name: Run container
+      run: |
+        docker run -d -p 8080:80 --name random-number-container-app ghcr.io/${{ github.repository }}/random-number-container-app:latest
+        sleep 10 # Wait for the container to be fully up and running
+
+    - name: Test container
+      run: |
+        curl -f http://localhost:8080 || exit 1
+
+    - name: Push Docker image
+      if: success()
+      uses: docker/build-push-action@v6.10.0
+      with:
+        context: .
+        push: true
+        tags: ghcr.io/${{ github.repository }}/random-number-container-app:latest
+
+    - name: Clean up
+      if: always()
+      run: |
+        docker stop random-number-container-app
+        docker rm random-number-container-app
